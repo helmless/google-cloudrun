@@ -33,7 +33,7 @@ jobs:
           application_private_key: ${{ secrets.CI_BOT_KEY }}
 
       - name: 📦 Create Release
-        uses: google-github-actions/release-please-action@v4
+        uses: googleapis/release-please-action@v4
         id: release
         with:
           token: ${{ steps.generate-token.outputs.token }}
@@ -41,31 +41,47 @@ jobs:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
       - name: 🏷️ Tag Major and Minor Versions
-        if: ${{ steps.release.outputs.release_created && steps.release.outputs.tag_name != null }}
+        if: ${{ steps.release.outputs.releases_created }}
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git remote add gh-token "https://${{ secrets.GITHUB_TOKEN }}@github.com/google-github-actions/release-please-action.git"
+          git remote add gh-token "https://${{ secrets.GITHUB_TOKEN }}@github.com/googleapis/release-please-action.git"
 
-          # Extract version and component from tag
-          TAG_NAME="${{ steps.release.outputs.tag_name }}"
-          COMPONENT=$(echo $TAG_NAME | cut -d'-' -f1)
-          VERSION=$(echo $TAG_NAME | sed 's/^.*-v//')
+          # Get all components that had releases
+          PATHS_RELEASED='${{ steps.release.outputs.paths_released }}'
 
-          # Extract major and minor versions
-          MAJOR=$(echo $VERSION | cut -d. -f1)
-          MINOR=$(echo $VERSION | cut -d. -f2)
+          # Process each released component
+          echo "$PATHS_RELEASED" | jq -r '.[]' | while read -r COMPONENT_PATH; do
+            # Skip if path is empty
+            [ -z "$COMPONENT_PATH" ] && continue
 
-          # Delete existing tags if they exist
-          git tag -d ${COMPONENT}-v${MAJOR} || true
-          git tag -d ${COMPONENT}-v${MAJOR}.${MINOR} || true
-          git push origin :${COMPONENT}-v${MAJOR} || true
-          git push origin :${COMPONENT}-v${MAJOR}.${MINOR} || true
+            # Get component-specific outputs
+            if [ "$COMPONENT_PATH" = "." ]; then
+              # Root component
+              TAG_NAME="${{ steps.release.outputs.tag_name }}"
+              MAJOR="${{ steps.release.outputs.major }}"
+              MINOR="${{ steps.release.outputs.minor }}"
+            else
+              # Path component
+              TAG_NAME="${{ steps.release.outputs[format('{0}--tag_name', COMPONENT_PATH)] }}"
+              MAJOR="${{ steps.release.outputs[format('{0}--major', COMPONENT_PATH)] }}"
+              MINOR="${{ steps.release.outputs[format('{0}--minor', COMPONENT_PATH)] }}"
+            fi
 
-          # Create new tags
-          git tag -a ${COMPONENT}-v${MAJOR} -m "Release ${COMPONENT}-v${MAJOR}"
-          git tag -a ${COMPONENT}-v${MAJOR}.${MINOR} -m "Release ${COMPONENT}-v${MAJOR}.${MINOR}"
+            # Extract component name from tag
+            COMPONENT=$(echo $TAG_NAME | cut -d'-' -f1)
 
-          # Push new tags
-          git push origin ${COMPONENT}-v${MAJOR}
-          git push origin ${COMPONENT}-v${MAJOR}.${MINOR}
+            # Delete existing tags if they exist
+            git tag -d ${COMPONENT}-v${MAJOR} || true
+            git tag -d ${COMPONENT}-v${MAJOR}.${MINOR} || true
+            git push origin :${COMPONENT}-v${MAJOR} || true
+            git push origin :${COMPONENT}-v${MAJOR}.${MINOR} || true
+
+            # Create new tags
+            git tag -a ${COMPONENT}-v${MAJOR} -m "Release ${COMPONENT}-v${MAJOR}"
+            git tag -a ${COMPONENT}-v${MAJOR}.${MINOR} -m "Release ${COMPONENT}-v${MAJOR}.${MINOR}"
+
+            # Push new tags
+            git push origin ${COMPONENT}-v${MAJOR}
+            git push origin ${COMPONENT}-v${MAJOR}.${MINOR}
+          done
