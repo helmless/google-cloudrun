@@ -2,20 +2,20 @@
     "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
     "release-type": "simple",
     "packages": {
-        ".": {
-            "release-type": "simple"
-        },
         "chart": {
             "release-type": "helm",
-            "component": "chart"
+            "component": "chart",
+            "path": "chart"
         },
         "action": {
             "release-type": "simple",
-            "component": "action"
+            "component": "action",
+            "path": "chart"
         },
         "terraform": {
             "release-type": "terraform-module",
-            "component": "terraform"
+            "component": "terraform",
+            "path": "chart"
         }
     },
     "prerelease": true,
