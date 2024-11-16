@@ -4,26 +4,24 @@
     "packages": {
         "chart": {
             "release-type": "helm",
-            "component": "chart",
-            "path": "chart"
+            "component": "chart"
         },
         "action": {
             "release-type": "simple",
-            "component": "action",
-            "path": "chart"
+            "component": "action"
         },
         "terraform": {
             "release-type": "terraform-module",
-            "component": "terraform",
-            "path": "chart"
+            "component": "terraform"
         }
     },
-    "prerelease": true,
+    "release-as": "0.1.0",
+    "separate-pull-requests": true,
+    "always-update": true,
     "bump-minor-pre-major": true,
-    "bump-patch-for-minor-pre-major": true,
-    "draft": false,
     "include-component-in-tag": true,
     "include-v-in-tag": true,
+    "group-pull-request-title-pattern": "chore: release ${component} v${version}",
     "changelog-sections": [
         {
             "type": "feat",
