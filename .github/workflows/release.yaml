@@ -18,11 +18,6 @@ jobs:
   release:
     name: 🏷️ Release Please
     runs-on: ubuntu-latest
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
-      major: ${{ steps.release.outputs.major }}
-      minor: ${{ steps.release.outputs.minor }}
     steps:
       # Required so that a release triggers follow up workflows
       - name: 🔑 Generate Token
@@ -40,48 +35,16 @@ jobs:
 
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
-      - name: 🏷️ Tag Major and Minor Versions
+      - name: 🔍 Get Released Components
+        if: ${{ steps.release.outputs.releases_created }}
+        id: get-components
+        run: |
+          PATHS_RELEASED='${{ steps.release.outputs.paths_released }}'
+          echo "paths=$(echo $PATHS_RELEASED | jq -c '.')" >> $GITHUB_OUTPUT
+
+      - name: 🏷️ Setup Git Config
         if: ${{ steps.release.outputs.releases_created }}
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git remote add gh-token "https://${{ secrets.GITHUB_TOKEN }}@github.com/googleapis/release-please-action.git"
-
-          # Get all components that had releases
-          PATHS_RELEASED='${{ steps.release.outputs.paths_released }}'
-
-          # Process each released component
-          echo "$PATHS_RELEASED" | jq -r '.[]' | while read -r COMPONENT_PATH; do
-            # Skip if path is empty
-            [ -z "$COMPONENT_PATH" ] && continue
-
-            # Get component-specific outputs
-            if [ "$COMPONENT_PATH" = "." ]; then
-              # Root component
-              TAG_NAME="${{ steps.release.outputs.tag_name }}"
-              MAJOR="${{ steps.release.outputs.major }}"
-              MINOR="${{ steps.release.outputs.minor }}"
-            else
-              # Path component
-              TAG_NAME="${{ steps.release.outputs[format('{0}--tag_name', COMPONENT_PATH)] }}"
-              MAJOR="${{ steps.release.outputs[format('{0}--major', COMPONENT_PATH)] }}"
-              MINOR="${{ steps.release.outputs[format('{0}--minor', COMPONENT_PATH)] }}"
-            fi
-
-            # Extract component name from tag
-            COMPONENT=$(echo $TAG_NAME | cut -d'-' -f1)
-
-            # Delete existing tags if they exist
-            git tag -d ${COMPONENT}-v${MAJOR} || true
-            git tag -d ${COMPONENT}-v${MAJOR}.${MINOR} || true
-            git push origin :${COMPONENT}-v${MAJOR} || true
-            git push origin :${COMPONENT}-v${MAJOR}.${MINOR} || true
-
-            # Create new tags
-            git tag -a ${COMPONENT}-v${MAJOR} -m "Release ${COMPONENT}-v${MAJOR}"
-            git tag -a ${COMPONENT}-v${MAJOR}.${MINOR} -m "Release ${COMPONENT}-v${MAJOR}.${MINOR}"
-
-            # Push new tags
-            git push origin ${COMPONENT}-v${MAJOR}
-            git push origin ${COMPONENT}-v${MAJOR}.${MINOR}
-          done
