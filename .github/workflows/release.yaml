@@ -37,3 +37,35 @@ jobs:
         id: release
         with:
           token: ${{ steps.generate-token.outputs.token }}
+
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+      - name: 🏷️ Tag Major and Minor Versions
+        if: ${{ steps.release.outputs.release_created && steps.release.outputs.tag_name != null }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git remote add gh-token "https://${{ secrets.GITHUB_TOKEN }}@github.com/google-github-actions/release-please-action.git"
+
+          # Extract version and component from tag
+          TAG_NAME="${{ steps.release.outputs.tag_name }}"
+          COMPONENT=$(echo $TAG_NAME | cut -d'-' -f1)
+          VERSION=$(echo $TAG_NAME | sed 's/^.*-v//')
+
+          # Extract major and minor versions
+          MAJOR=$(echo $VERSION | cut -d. -f1)
+          MINOR=$(echo $VERSION | cut -d. -f2)
+
+          # Delete existing tags if they exist
+          git tag -d ${COMPONENT}-v${MAJOR} || true
+          git tag -d ${COMPONENT}-v${MAJOR}.${MINOR} || true
+          git push origin :${COMPONENT}-v${MAJOR} || true
+          git push origin :${COMPONENT}-v${MAJOR}.${MINOR} || true
+
+          # Create new tags
+          git tag -a ${COMPONENT}-v${MAJOR} -m "Release ${COMPONENT}-v${MAJOR}"
+          git tag -a ${COMPONENT}-v${MAJOR}.${MINOR} -m "Release ${COMPONENT}-v${MAJOR}.${MINOR}"
+
+          # Push new tags
+          git push origin ${COMPONENT}-v${MAJOR}
+          git push origin ${COMPONENT}-v${MAJOR}.${MINOR}
