@@ -18,11 +18,10 @@
             "component": "terraform"
         }
     },
-    "prerelease": false,
+    "prerelease": true,
     "bump-minor-pre-major": true,
     "bump-patch-for-minor-pre-major": true,
     "draft": false,
-    "bootstrap-sha": "main",
     "include-component-in-tag": true,
     "include-v-in-tag": true,
     "changelog-sections": [
