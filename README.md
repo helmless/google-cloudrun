@@ -63,13 +63,7 @@ gcloud run services delete serverless-helm --region=<region>
 
 ## Configuration Reference
 
-Find the full configuration reference in the [docs/values.md](./docs/values.md) file.
-
-{{ template "chart.maintainers" . }}
-
-## License
-
-{{ template "chart.license" . }}
+Find the full configuration reference for the Helm chart in the [chart/docs/values.md](./chart/docs/values.md) file.
 
 ## TODO:
 
