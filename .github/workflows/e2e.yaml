@@ -1,5 +1,8 @@
 name: 🧪 E2E Tests
 
+env:
+  DRY_RUN: false
+
 on:
   pull_request:
     branches: [main]
@@ -34,6 +37,9 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    environment: e2e
+    concurrency:
+      group: ${{ matrix.service }}
     strategy:
       matrix:
         service: ${{ fromJson(needs.discover.outputs.services) }}
@@ -58,9 +64,10 @@ jobs:
           gcp_project: ${{ secrets.GCP_PROJECT_ID }}
           files: ${{ matrix.service }}/values.yaml
           chart: ./chart
+          dry_run: ${{ env.DRY_RUN }}
 
       - name: 💣 Cleanup Service
-        if: always()
+        if: always() && ${{ env.DRY_RUN == 'false' }}
         shell: bash
         run: |
           # Extract service name from values.yaml
