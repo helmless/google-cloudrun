@@ -1,0 +1,73 @@
+name: 🧪 E2E Tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'action/**'
+      - 'chart/**'
+      - '.github/workflows/**'
+  push:
+    branches: [main]
+    paths:
+      - 'action/**'
+      - 'chart/**'
+      - '.github/workflows/**'
+jobs:
+  discover:
+    name: 🔍 Discover Services
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.set-matrix.outputs.services }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: set-matrix
+        shell: bash
+        run: |
+          SERVICES=$(ls -d examples/*/ | jq -R -s -c 'split("\n")[:-1]')
+          echo "services=$SERVICES" >> $GITHUB_OUTPUT
+
+  e2e:
+    name: 🚀 ${{ matrix.service }}
+    needs: discover
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.discover.outputs.services) }}
+      fail-fast: false
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔑 Google Auth
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          token_format: 'access_token'
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_POOL }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: 🚀 Deploy Service
+        uses: ./action
+        id: deploy
+        with:
+          gcp_project: ${{ secrets.GCP_PROJECT_ID }}
+          files: ${{ matrix.service }}/values.yaml
+          chart: ./chart
+
+      - name: 💣 Cleanup Service
+        if: always()
+        shell: bash
+        run: |
+          # Extract service name from values.yaml
+          SERVICE_NAME=$(yq eval '.name' ${{ matrix.service }}/values.yaml)
+
+          echo "Deleting service: $SERVICE_NAME in region: $REGION"
+          gcloud run services delete $SERVICE_NAME \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --region=${{ steps.deploy.outputs.region }} \
+            --quiet

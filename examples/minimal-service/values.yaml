@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/serverless-helm/cloudrun/main/chart/values.schema.json
+name: minimal-service
+region: europe-west1
+
+env:
+  COLOR: 'blue'
+
+image: 'us-docker.pkg.dev/cloudrun/container/hello'

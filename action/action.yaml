@@ -1,34 +1,129 @@
-name: ''
-description: 'Greet someone'
+name: Deploy Cloud Run Service
+description: Templates and deploys a Cloud Run service using Helm and gcloud CLI
+author: 'Michael Reichenbach (Silthus)'
+branding:
+  icon: 'cloud'
+  color: 'blue'
+
 inputs:
-  who-to-greet: # id of input
-    description: 'Who to greet'
+  chart:
+    description: 'Helm chart to use for templating. Defaults to the built-in cloudrun chart.'
+    required: false
+    default: 'oci://ghcr.io/serverless-helm/cloudrun'
+  chart_version:
+    description: 'Version of the Helm chart to use.'
+    required: false
+    default: 'latest'
+  files:
+    description: 'Glob patterns of value files to include when templating the chart.'
+    required: false
+    default: 'values.yaml'
+  values:
+    description: 'Additional values to pass to the Helm chart when templating. Use one line per key-value pair.'
+    required: false
+  override_values:
+    description: 'Override values to pass to the Helm chart when templating. These values are set last and will override any other values. Use one line per key-value pair.'
+    required: false
+  gcp_project:
+    description: 'Google Cloud project ID to deploy to.'
     required: true
-    default: 'World'
+  dry_run:
+    description: 'If true, only validate the configuration without deploying.'
+    required: false
+    default: 'false'
+  print_manifest:
+    description: 'If true, print the rendered manifest to the console.'
+    required: false
+    default: 'true'
 outputs:
-  random-number:
-    description: 'Random number'
-    value: ${{ steps.random-number-generator.outputs.random-number }}
+  manifest:
+    description: 'The rendered manifest from the Helm chart as YAML.'
+    value: ${{ steps.template.outputs.manifest }}
+  region:
+    description: 'The region the service was deployed to.'
+    value: ${{ steps.region.outputs.region }}
+
 runs:
-  using: 'composite'
+  using: composite
   steps:
-    - name: Set Greeting
-      run: echo "Hello $INPUT_WHO_TO_GREET."
-      shell: bash
-      env:
-        INPUT_WHO_TO_GREET: ${{ inputs.who-to-greet }}
+    - name: ⚙️ Install Helm
+      uses: azure/setup-helm@v4
+      with:
+        version: '3.14.3'
 
-    - name: Random Number Generator
-      id: random-number-generator
-      run: echo "random-number=$(echo $RANDOM)" >> $GITHUB_OUTPUT
-      shell: bash
+    - name: 📦 Setup Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
 
-    - name: Set GitHub Path
-      run: echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
+    - name: 📜 Template Chart
+      id: template
       shell: bash
-      env:
-        GITHUB_ACTION_PATH: ${{ github.action_path }}
+      run: |
+        VERSION_ARG=""
+        if [ "${{ inputs.chart_version }}" != "latest" ]; then
+          VERSION_ARG="--version ${{ inputs.chart_version }}"
+        fi
 
-    - name: Run goodbye.sh
-      run: goodbye.sh
+        FILES=""
+        for pattern in ${{ inputs.files }}; do
+          if [ -f "$pattern" ]; then
+            FILES="$FILES -f $pattern"
+          fi
+        done
+
+        VALUES=""
+        if [ -n "${{ inputs.values }}" ]; then
+          while IFS= read -r line; do
+            if [ -n "$line" ]; then
+              VALUES="$VALUES --set $line"
+            fi
+          done <<< "${{ inputs.values }}"
+        fi
+
+        OVERRIDE_VALUES=""
+        if [ -n "${{ inputs.override_values }}" ]; then
+          while IFS= read -r line; do
+            if [ -n "$line" ]; then
+              OVERRIDE_VALUES="$OVERRIDE_VALUES --set $line"
+            fi
+          done <<< "${{ inputs.override_values }}"
+        fi
+
+        echo "🔍 Templating Helm chart..."
+        helm template oci://ghcr.io/serverless-helm/cloudrun \
+          $VERSION_ARG \
+          $FILES \
+          $VALUES \
+          $OVERRIDE_VALUES \
+          --output-dir out/
+
+        if [ -f "out/cloudrun/templates/cloudrun.yaml" ]; then
+          echo "✅ Successfully generated Cloud Run manifest"
+        else
+          echo "❌ Failed to find Cloud Run manifest at expected location"
+          exit 1
+        fi
+
+        if [ "${{ inputs.print_manifest }}" = "true" ]; then
+          echo "📄 Generated Cloud Run manifest:"
+          cat out/cloudrun/templates/cloudrun.yaml
+        fi
+
+        echo "manifest<<EOF" >> $GITHUB_OUTPUT
+        cat out/cloudrun/templates/cloudrun.yaml >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: 🗺️ Extract Region & Deploy
+      id: region
       shell: bash
+      run: |
+        REGION=$(yq eval '.metadata.annotations["run.googleapis.com/region"]' out/cloudrun/templates/cloudrun.yaml)
+        echo "region=$REGION" >> $GITHUB_OUTPUT
+        echo "🌎 Deploying to region: $REGION"
+
+    - name: 🚀 Deploy to Cloud Run
+      shell: bash
+      id: deploy
+      run: |
+        gcloud run services replace out/cloudrun/templates/cloudrun.yaml \
+          --region=${{ steps.region.outputs.region }} \
+          --project=${{ inputs.gcp_project }} ${{ inputs.dry_run == 'true' && '--dry-run' || '' }}
