@@ -62,3 +62,5 @@ out/
 charts/*/charts/
 charts/*/requirements.lock
 charts/*/Chart.lock
+
+.cache/
