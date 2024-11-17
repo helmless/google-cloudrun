@@ -1,6 +1,6 @@
 apiVersion: v2
-name: serverless-helm-cloudrun
-description: A Helm chart to template a Google CloudRun YAML specification.
+name: cloudrun
+description: Templates a Google CloudRun YAML manifest that can be deployed using the Google Cloud CLI.
 type: application
 version: 0.1.0
 maintainers:
