@@ -1,8 +1,8 @@
 # Serverless Google CloudRun Helm Deployments
 
-![Version](https://img.shields.io/github/v/release/serverless-helm/cloudrun)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/serverless-helm/cloudrun/release.yaml)
-![License](https://img.shields.io/github/license/serverless-helm/cloudrun)
+![Version](https://img.shields.io/github/v/release/helmless/google-cloudrun-chart)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/helmless/google-cloudrun-chart/release.yaml)
+![License](https://img.shields.io/github/license/helmless/google-cloudrun-chart)
 
 ## Overview
 
