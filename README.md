@@ -63,16 +63,4 @@ gcloud run services delete serverless-helm --region=<region>
 
 ## Configuration Reference
 
-Find the full configuration reference for the Helm chart in the [chart/docs/values.md](./chart/docs/values.md) file.
-
-## TODO:
-
-### Documentation
-
-- [ ] Add documentation page using [MkDocs](https://www.mkdocs.org/)
-- [ ] Add documentation for the Github Action
-- [ ] [How to setup Google Cloud credentials for Github Actions](https://github.com/google-github-actions/auth#workload-identity-federation-through-a-service-account)
-  - Important: give the service account the following roles needed to deploy to Cloud Run:
-    - `roles/run.admin`
-    - `roles/iam.serviceAccountUser` on the service account used to run the CloudRun Service - by default this is the project's default service account - highly recommended to create a new service account to run the CloudRun Service and grant only the necessary roles to this account
-    - `roles/iam.serviceAccountTokenCreator` on the repository service account itself
+Find the full configuration reference for the Helm chart in the [chart/docs/values.md](./chart/docs/values.md) file
