@@ -1,5 +1,5 @@
 apiVersion: v2
-name: cloudrun
+name: google-cloudrun
 description: Templates a Google CloudRun YAML manifest that can be deployed
   using the Google Cloud CLI.
 type: application

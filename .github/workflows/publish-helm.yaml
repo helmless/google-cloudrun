@@ -25,12 +25,12 @@ jobs:
 
       - name: 📦 Package Helm Chart
         run: |
-          helm package chart/
+          helm package .
 
       - name: ☁️ Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: cloudrun-*.tgz
+          files: google-cloudrun-*.tgz
           tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -40,4 +40,4 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: 🐳 Push to GitHub Container Registry
         run: |
-          helm push cloudrun-*.tgz oci://ghcr.io/${{ github.repository_owner }}
+          helm push google-cloudrun-*.tgz oci://ghcr.io/${{ github.repository_owner }}

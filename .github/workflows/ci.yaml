@@ -22,13 +22,13 @@ jobs:
           version: '3.14.3'
 
       - name: 🧪 Run Helm Lint
-        run: helm lint chart/
+        run: helm lint .
 
       - name: 📦 Test Helm Package
-        run: helm package chart/ --debug
+        run: helm package . --debug
 
       - name: 🔍 Verify Chart Schema
-        run: helm template chart/
+        run: helm template .
   formatting:
     name: 🎨 Code Format
     runs-on: ubuntu-latest

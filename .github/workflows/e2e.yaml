@@ -4,18 +4,11 @@ env:
   DRY_RUN: false
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'action/**'
-      - 'chart/**'
-      - '.github/workflows/**'
-  push:
-    branches: [main]
-    paths:
-      - 'action/**'
-      - 'chart/**'
-      - '.github/workflows/**'
+  workflow_dispatch:
+  # pull_request:
+  #   branches: [main]
+  # push:
+  #   branches: [main]
 jobs:
   discover:
     name: 🔍 Discover Services
@@ -57,13 +50,17 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_POOL }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
+      - name: 📜 Template Helmless Chart
+        uses: helmless/action@main
+        with:
+          files: ${{ matrix.service }}/values.yaml
+          chart: ./
+
       - name: 🚀 Deploy Service
-        uses: ./action
+        uses: helmless/google-cloudrun-deploy-action@main
         id: deploy
         with:
           gcp_project: ${{ secrets.GCP_PROJECT_ID }}
-          files: ${{ matrix.service }}/values.yaml
-          chart: ./chart
           dry_run: ${{ env.DRY_RUN }}
 
       - name: 💣 Cleanup Service
