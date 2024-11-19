@@ -407,13 +407,12 @@ tests:
             value: '42'
 
   # Region Tests
-  - it: should set default region to europe-west1
+  - it: should not set a region when not provided
     asserts:
-      - equal:
+      - isNull:
           path: metadata.annotations["run.googleapis.com/region"]
-          value: europe-west1
 
-  - it: should allow overriding the region
+  - it: should create the region annotation when provided
     set:
       region: us-central1
     asserts:

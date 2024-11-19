@@ -245,9 +245,10 @@
             ]
         },
         "region": {
-            "description": "The region to deploy the CloudRun service to.",
+            "description": "The region to deploy the CloudRun service to. Will default to the region set in the Google Cloud CLI.",
             "type": [
-                "string"
+                "string",
+                "null"
             ]
         },
         "resources": {
@@ -419,7 +420,6 @@
         "type",
         "name",
         "launchStage",
-        "region",
         "image"
     ],
     "title": "CloudRun Helm Chart",
