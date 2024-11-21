@@ -1,12 +1,11 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
-  []
-  # - repo: https://github.com/losisin/helm-values-schema-json
-  #   rev: v1.6.3
-  #   hooks:
-  #     - id: helm-schema
-  #       args: []
+  - repo: https://github.com/losisin/helm-values-schema-json
+    rev: v1.6.3
+    hooks:
+      - id: helm-schema
+        args: []
   # - repo: local
   #   hooks:
   #     # - id: helm-schema

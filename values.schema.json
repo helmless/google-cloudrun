@@ -1,5 +1,5 @@
 {
-    "$id": "https://github.com/serverless-helm/serverless-helm/charts/cloudrun",
+    "$id": "https://github.com/helmless/google-cloudrun",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "additionalProperties": true,
     "description": "A Helm chart to template the manifest of a Cloud Run service or job.",
@@ -245,10 +245,9 @@
             ]
         },
         "region": {
-            "description": "The region to deploy the CloudRun service to. Will default to the region set in the Google Cloud CLI.",
+            "description": "The region to deploy the CloudRun service to.",
             "type": [
-                "string",
-                "null"
+                "string"
             ]
         },
         "resources": {
@@ -417,9 +416,7 @@
         }
     },
     "required": [
-        "type",
         "name",
-        "launchStage",
         "image"
     ],
     "title": "CloudRun Helm Chart",

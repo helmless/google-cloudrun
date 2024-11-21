@@ -1,13 +1,13 @@
 # Required
 input:
-  - chart/values.yaml
+  - values.yaml
 
 draft: 2020
 indent: 4
-output: chart/values.schema.json
+output: values.schema.json
 
 schemaRoot:
-  id: https://github.com/serverless-helm/serverless-helm/charts/cloudrun
+  id: https://github.com/helmless/google-cloudrun
   title: CloudRun Helm Chart
   description: A Helm chart to template the manifest of a Cloud Run service or job.
   additionalProperties: true
