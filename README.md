@@ -1,66 +1,57 @@
-# Serverless Google CloudRun Helm Deployments
+# Helmless Chart for Google Cloud Run
 
-![Version](https://img.shields.io/github/v/release/helmless/google-cloudrun-chart)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/helmless/google-cloudrun-chart/release.yaml)
-![License](https://img.shields.io/github/license/helmless/google-cloudrun-chart)
+[![Documentation](https://img.shields.io/badge/docs-helmless.io-blue)](https://helmless.io/docs/docs/cloudrun/chart)
+[![Version](https://img.shields.io/github/v/release/helmless/google-cloudrun-chart)](https://github.com/helmless/google-cloudrun-chart/releases)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/helmless/google-cloudrun-chart/release.yaml)](https://github.com/helmless/google-cloudrun-chart/actions/workflows/release.yaml)
+[![semantic-versioning: helmless](https://img.shields.io/badge/semantic--versioning-helmless-e10079?logo=semantic-release)](https://github.com/helmless/google-cloudrun-chart/releases)
+[![License](https://img.shields.io/github/license/helmless/google-cloudrun-chart)](https://github.com/helmless/google-cloudrun-chart/blob/main/LICENSE)
 
-## Overview
-
-### The Challenge
-
-Modern container deployment presents teams with a challenging dilemma:
-
-**Kubernetes** offers a powerful developer experience through GitOps-style deployments, where simple YAML files in your repository define and manage container workloads. However, it demands significant operational overhead, expertise, and resources - making it impractical for many early-stage companies and small teams.
-
-**Serverless platforms** like Google Cloud Run provide a streamlined, cost-effective alternative for hosting containers without infrastructure management. But when implementing GitOps practices, teams are often forced to use Terraform, leading to:
-
-- Long feedback cycles and deployment times
-- Infrastructure changes siloed in separate repositories
-- Complex approval processes for simple updates like environment variables
-- Tight coupling between application and infrastructure changes
-
-### The Solution
-
-This project offers a new approach using a custom Helm chart and Github Actions to combine the best of both worlds:
-
-- **Kubernetes-like Developer Experience**: Use familiar Helm syntax and values files to manage your container workloads directly in your application repositories
-- **Serverless Simplicity**: Generate Cloud Run YAML specifications that deploy directly via the Google Cloud CLI - no Kubernetes required
-- **Rapid Iterations**: Update environment variables and configurations by simply modifying `values.yaml` - no Terraform changes needed
-- **Minimal Infrastructure Code**: Reduce Terraform to a thin wrapper that only manages resources like IAM, while delegating container configuration to Helm
-- **GitOps Ready**: Version control your Cloud Run configurations and automate deployments through CI/CD pipelines
-
-This innovative approach has been proven in production, enabling teams to achieve up to 10x faster deployments while maintaining the simplicity and cost benefits of serverless infrastructure.
-
-This Helm chart generates manifests compatible with Google Cloud Run's YAML specification, which can be deployed using the `gcloud run services replace` command or the Github Action from this repository.
+This [Helmless](https://helmless.io) chart generates a manifest compatible with [Google Cloud Run's YAML specification](https://cloud.google.com/run/docs/reference/yaml/v1), which can then be deployed using the `gcloud run services replace` command or the [helmless/google-cloudrun-deploy-action](https://github.com/helmless/google-cloudrun-deploy-action). Head to the [documentation](https://helmless.io/docs/cloudrun) for more information.
 
 ## Prerequisites
 
 - [Helm](https://helm.sh/) v3.x
 - [Google Cloud SDK](https://cloud.google.com/sdk/docs/install)
-- Access to a Google Cloud project with Cloud Run enabled
-
-## Getting Started
+- Access to a Google Cloud project and permissions to deploy to Google Cloud Run
+- The `run.googleapis.com` API enabled on your project
 
 ## Usage
 
-To render the manifest for a Cloud Run service or job, run the following command:
+If you are new to Helmless I suggest you head to the [documentation](https://helmless.io/docs/) first. If you want to learn by doing or are already familiar with Helmless, continue reading.
+
+1. You will need to create a `values.yaml` file to configure your deployment.
 
 ```bash
-helm template oci://ghcr.io/serverless-helm/cloudrun/charts/serverless-helm-cloudrun -f values.yaml > cloudrun_manifest.yaml
+cat <<EOF > values.yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helmless/google-cloudrun-chart/main/values.schema.json
+name: 'my-helmless-service'
+region: 'us-central1'
+image: 'us-docker.pkg.dev/cloudrun/container/hello:latest'
+env:
+  COLOR: 'blue'
+autoscaling:
+  minScale: 0
+EOF
 ```
 
-To deploy the manifest, run the following command:
+2. Render the manifest using `helm template`:
 
 ```bash
-gcloud run services replace out/cloudrun/templates/serverless-helm.cloudrun.yaml --region=<region>
+helm template oci://ghcr.io/helmless/google-cloudrun -f values.yaml > cloudrun_manifest.yaml
 ```
 
-To clean up and delete the service, run the following command:
+3. Deploy the manifest using `gcloud run services replace`:
 
 ```bash
-gcloud run services delete serverless-helm --region=<region>
+gcloud run services replace cloudrun_manifest.yaml
+```
+
+4. To clean up and delete the service, run the following command:
+
+```bash
+gcloud run services delete my-helmless-service --region=us-central1
 ```
 
 ## Configuration Reference
 
-Find the full configuration reference for the Helm chart in the [chart/docs/values.md](./chart/docs/values.md) file
+You can find the full configuration reference for the Helm chart in the [docs/values.md](./docs/values.md) file.

@@ -6,15 +6,10 @@ repos:
     hooks:
       - id: helm-schema
         args: []
-  # - repo: local
-  #   hooks:
-  #     # - id: helm-schema
-  #     #   files: ^chart/values\.yaml$
-  #     #   name: Generate helm schema
-  #     #   entry: bash -c 'helm schema'
-  #     #   language: system
-  #     - id: schema-docs
-  #       name: Generate schema documentation
-  #       entry: bash -c 'npx @adobe/jsonschema2md -h false -d chart -o chart/docs'
-  #       language: system
-  #       files: ^chart/values\.yaml$
+  - repo: local
+    hooks:
+      - id: schema-docs
+        name: Generate schema documentation
+        entry: bash -c 'npx @adobe/jsonschema2md --header false --input . --out docs/'
+        language: system
+        files: ^values.schema.json$

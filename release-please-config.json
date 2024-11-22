@@ -6,6 +6,6 @@
     },
     "bump-minor-pre-major": true,
     "include-component-in-tag": false,
-    "include-v-in-tag": true,
-    "group-pull-request-title-pattern": "chore: release ${component} v${version}"
+    "include-v-in-tag": false,
+    "group-pull-request-title-pattern": "chore: release ${component} ${version}"
 }
