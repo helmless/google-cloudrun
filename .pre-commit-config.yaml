@@ -10,6 +10,6 @@ repos:
     hooks:
       - id: schema-docs
         name: Generate schema documentation
-        entry: bash -c 'npx @adobe/jsonschema2md --header false --input . --out docs/'
+        entry: bash -c 'npx @adobe/jsonschema2md --header false --input . --out docs/ && mv docs/values.md docs/index.md'
         language: system
         files: ^values.schema.json$
