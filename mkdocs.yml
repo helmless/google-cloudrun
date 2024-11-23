@@ -1,2 +1,7 @@
 nav:
-  - Schema: docs/schema/values.md
+  - index.md
+  - Getting Started: getting-started.md
+  - CI/CD: ci-cd.md
+  - Advanced: advanced.md
+  - Examples: examples.md
+  - Schema: schema/values.md
