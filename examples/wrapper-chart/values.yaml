@@ -1,0 +1,4 @@
+cloudrun1:
+  name: my-cloudrun
+cloudrun2:
+  name: my-cloudrun2
