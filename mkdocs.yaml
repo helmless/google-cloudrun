@@ -1,0 +1,11 @@
+nav:
+  - cloudrun/schema/index.md
+  - autoscaling: cloudrun/schema/values-properties-autoscaling.md
+  - env: cloudrun/schema/values-properties-env.md
+  - image: cloudrun/schema/values-properties-image.md
+  - labels: cloudrun/schema/values-properties-labels.md
+  - livenessprobe: cloudrun/schema/values-properties-livenessprobe.md
+  - readinessprobe: cloudrun/schema/values-properties-readinessprobe.md
+  - resources: cloudrun/schema/values-properties-resources.md
+  - startupprobe: cloudrun/schema/values-properties-startupprobe.md
+  - vpc: cloudrun/schema/values-properties-vpc.md
