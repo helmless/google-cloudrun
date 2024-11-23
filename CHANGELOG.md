@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.0](https://github.com/helmless/google-cloudrun-chart/compare/v0.1.0...0.2.0) (2024-11-23)
+
+
+### Features
+
+* enable e2e tests ([cf1f091](https://github.com/helmless/google-cloudrun-chart/commit/cf1f0913ef567ff18ffdff9faa9d0df88a389b2b))
+
+
+### Bug Fixes
+
+* remove release pin ([8f1d764](https://github.com/helmless/google-cloudrun-chart/commit/8f1d764e8e2ef4b4f6929370d999c80869eeda13))
+* **schema:** update schema ([9cdb5dc](https://github.com/helmless/google-cloudrun-chart/commit/9cdb5dc6d24ba565a3bdf0d676453577565b6b8b))
+
 ## 0.1.0 (2024-11-19)
 
 

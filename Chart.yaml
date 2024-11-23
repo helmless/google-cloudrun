@@ -3,7 +3,7 @@ name: google-cloudrun
 description: Templates a Google CloudRun YAML manifest that can be deployed
   using the Google Cloud CLI.
 type: application
-version: 0.1.0
+version: 0.2.0
 maintainers:
   - name: 'Michael Reichenbach (Silthus)'
     email: 'me@silthus.net'
